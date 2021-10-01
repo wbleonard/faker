@@ -18,12 +18,12 @@ Snappy compression in Python requires the `python-snappy` package.
 
 ### Client Configuration
 
-Edit [params.py](params.py) and at a minimum, set your connection string. Other tunables include the amount of bytes to insert (default 10 MB) and the batch insert size (1 MB):
+Edit [params.py](params.py) and at a minimum, set your connection string. Other tunables include the number of records to insert (default 30,000) and the batch insert size (jdefault 10,000):
 
 ``` PYTHON
-drop_collection = True    # Drop collection on run
-megabytes_to_insert = 10
-batch_size_mb = 1         # Batch size of bulk insert in megabytes
+drop_collection = False   # Drop collection on run
+records_to_insert = 30000
+batch_size = 10000       # Batch size of bulk insert
 ```
 
 ## Execution
