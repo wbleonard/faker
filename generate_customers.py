@@ -5,6 +5,7 @@ from datetime import datetime
 from pymongo import MongoClient
 from faker import Faker
 import argparse
+from business_objects import *
 
 # Process arguments
 #parser = argparse.ArgumentParser(description='MongoDB Network Compression Test')
@@ -35,14 +36,16 @@ t_start = time.time()
 
 offers = []  # customers array for bulk insert
 
-print ("Records to insert: {}".format(records_to_insert))
-print ("Batch insert size: {}".format(batch_size))
+print ("Records to insert: {},".format(records_to_insert))
+print ("Batch insert size: {},".format(batch_size))
 
 while insert_count < records_to_insert:
 
     try:
 
-        offer = {
+        offer = customer
+        
+        job = {
             "name": fake.name(),
             "email": fake.ascii_email(),
             "phone_number": fake.phone_number(),
@@ -66,7 +69,7 @@ while insert_count < records_to_insert:
                 "bs": fake.bs()
             },
             "notes": fake.text()
-        }
+        },
 
         offers.append(offer)
 
@@ -80,7 +83,7 @@ while insert_count < records_to_insert:
 
             # Print performance stats
             duration = time.time()-t_start
-            print('{:.0f} records inserted'.format(insert_count), 'at {:.1f} records/second'.format(insert_count/duration))
+            print('{:.0f}, records inserted'.format(insert_count), 'at {:.1f}, records/second'.format(insert_count/duration))
 
     except KeyboardInterrupt:
         print

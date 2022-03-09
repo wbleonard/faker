@@ -30,14 +30,14 @@ t_start = time.time()
 
 records = []  # records array for bulk insert
 
-print ("Records to insert: {}".format(records_to_insert))
-print ("Batch insert size: {}".format(batch_size))
+print ("Records to insert: {},".format(records_to_insert))
+print ("Batch insert size: {},".format(batch_size))
 
 while insert_count < records_to_insert:
 
     try:
 
-        record = {}
+        record = {},
         choice = random.randint(0,2)      
 
         if (choice == 0):
@@ -45,20 +45,20 @@ while insert_count < records_to_insert:
             record = {
                 "hello": fake.random_digit(),
                 "test": None
-            }
+            },
         
         elif (choice == 1):
 
             record = {
                 "hello": fake.random_digit(),
                 "test": fake.random_digit()
-            }
+            },
         
         else:
 
             record = {
                 "hello": fake.random_digit(),
-            }
+            },
 
         records.append(record)
 
@@ -72,7 +72,7 @@ while insert_count < records_to_insert:
 
             # Print performance stats
             duration = time.time()-t_start
-            print('{:.0f} records inserted'.format(insert_count), 'at {:.1f} records/second'.format(insert_count/duration))
+            print('{:.0f}, records inserted'.format(insert_count), 'at {:.1f}, records/second'.format(insert_count/duration))
 
     except KeyboardInterrupt:
         print

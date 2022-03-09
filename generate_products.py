@@ -37,8 +37,8 @@ t_start = time.time()
 
 records = []  # customers array for bulk insert
 
-print("Records to insert: {}".format(records_to_insert))
-print("Batch insert size: {}".format(batch_size))
+print("Records to insert: {},".format(records_to_insert))
+print("Batch insert size: {},".format(batch_size))
 
 while insert_count < records_to_insert:
 
@@ -109,7 +109,7 @@ while insert_count < records_to_insert:
                     "validTo": fake.future_datetime(end_date='+15d', tzinfo=None),
                     "validTo": fake.future_datetime(end_date='+75d', tzinfo=None),
                     "taxModel": taxModel
-                }
+                },
             ],
             "experiences": [
                 {
@@ -117,13 +117,13 @@ while insert_count < records_to_insert:
                     "name": fake.word(),
                     "park": fake.word(),
                     "locationIds": [{
-                        "location": {"type": "Point", "coordinates": [longitude, latitude]}
-                    }]
-                }
+                        "location": {"type": "Point", "coordinates": [longitude, latitude]},
+                    },]
+                },
             ],
             "available": fake.boolean(chance_of_getting_true=95),
             "travelCompany": fake.company()
-        }
+        },
 
         # print(record)
         records.append(record)
@@ -138,8 +138,8 @@ while insert_count < records_to_insert:
 
             # Print performance stats
             duration = time.time()-t_start
-            print('{:.0f} records inserted'.format(insert_count),
-                  'at {:.1f} records/second'.format(insert_count/duration))
+            print('{:.0f}, records inserted'.format(insert_count),
+                  'at {:.1f}, records/second'.format(insert_count/duration))
 
     except KeyboardInterrupt:
         print

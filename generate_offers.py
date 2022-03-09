@@ -36,8 +36,8 @@ def generateStoreLocations(storeName):
             "merchantIds": [{
                         "type": "VISA_MASTERCARD",
                         "value": "510159890101074"
-            }]
-        }
+            },]
+        },
         
         store_locations.append(storeLocation)
         store = store + 1
@@ -71,8 +71,8 @@ t_start = time.time()
 
 offers = []  # customers array for bulk insert
 
-print("Records to insert: {}".format(records_to_insert))
-print("Batch insert size: {}".format(batch_size))
+print("Records to insert: {},".format(records_to_insert))
+print("Batch insert size: {},".format(batch_size))
 
 while insert_count < records_to_insert:
 
@@ -127,14 +127,14 @@ while insert_count < records_to_insert:
                     "preMessageText": discount + "% back on your next purchase",
                     "postMessageText": "Earn" + discount + " % cash back on every purchase at " + company + ". Rewards can be earned on every purchase until a maximum of $2,000 in combined total spend each month is reached. <b>Purchase must be made directly with the merchant in store.</b> Payment must be made on or before expiration date. Offer not valid on third-party delivery services. <br/><br/>Offer valid only at: <br/>123 Main Street, " + locality + ", " + adminAreaLevelOne + " 08081",
                     "thankYouMessageText": "Thank you for choosing " + company + "!"
-                }
+                },
             },
             "cardholderRewardCaps": [
                 {
                     "type": "REDEEMED_TRANSACTION_AMOUNT",
                     "interval": "MONTH",
                     "value": 2000.000000
-                }
+                },
             ],
             "exclusions": {
                 "exclusionDayOfWeek": None,
@@ -155,7 +155,7 @@ while insert_count < records_to_insert:
             "merchantIds": [{
                 "type": "VISA_MASTERCARD",
                 "value": "510159890101074"
-            }],
+            },],
             "images": [{
                 "description": "merchantLogoSmall",
                 "url": "https://image-content.s3.amazonaws.com/bamd/1000041539-746283-logo-1619036979041.png",
@@ -171,7 +171,7 @@ while insert_count < records_to_insert:
                 "url": "https://image-content.s3.amazonaws.com/bamd/1000041539-746283-logo-1619036979041.png",
                 "resolution": "128.128",
                 "altText": company
-            }],
+            },],
             "storeLocations": generateStoreLocations(company),
             "budget": None,
             "alerts": [],
@@ -179,8 +179,8 @@ while insert_count < records_to_insert:
             "matchRules": [{
                 "id": "R1",
                 "value": "merchantId | In | 510159890101074"
-            }]
-        }
+            },]
+        },
         # print(offer)
         offers.append(offer)
 
@@ -194,8 +194,8 @@ while insert_count < records_to_insert:
 
             # Print performance stats
             duration = time.time()-t_start
-            print('{:.0f} records inserted'.format(insert_count),
-                  'at {:.1f} records/second'.format(insert_count/duration))
+            print('{:.0f}, records inserted'.format(insert_count),
+                  'at {:.1f}, records/second'.format(insert_count/duration))
 
     except KeyboardInterrupt:
         print
