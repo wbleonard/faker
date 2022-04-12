@@ -37,7 +37,7 @@ def generateStoreLocations(storeName):
                         "type": "VISA_MASTERCARD",
                         "value": "510159890101074"
             },]
-        },
+        }
         
         store_locations.append(storeLocation)
         store = store + 1
@@ -180,7 +180,7 @@ while insert_count < records_to_insert:
                 "id": "R1",
                 "value": "merchantId | In | 510159890101074"
             },]
-        },
+        } 
         # print(offer)
         offers.append(offer)
 

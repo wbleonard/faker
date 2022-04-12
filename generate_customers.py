@@ -34,7 +34,7 @@ insert_count = 0  # Count the records inserted.
 batch_size = params.batch_size
 t_start = time.time()
 
-offers = []  # customers array for bulk insert
+records = []  # array for bulk insert
 
 print ("Records to insert: {},".format(records_to_insert))
 print ("Batch insert size: {},".format(batch_size))
@@ -42,10 +42,8 @@ print ("Batch insert size: {},".format(batch_size))
 while insert_count < records_to_insert:
 
     try:
-
-        offer = customer
         
-        job = {
+        record = {
             "name": fake.name(),
             "email": fake.ascii_email(),
             "phone_number": fake.phone_number(),
@@ -69,17 +67,17 @@ while insert_count < records_to_insert:
                 "bs": fake.bs()
             },
             "notes": fake.text()
-        },
+        }
 
-        offers.append(offer)
+        records.append(record)
 
         insert_count += 1
-               
+      
          # If the modulus falls in the range of the record size, insert the batch.
         if(insert_count % batch_size == 0):
 
-            collection.insert_many(offers)
-            offers = []
+            collection.insert_many(records)
+            records = []
 
             # Print performance stats
             duration = time.time()-t_start
