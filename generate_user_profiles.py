@@ -180,9 +180,8 @@ def delete_group(groups_collection, users_collection, group):
         print('{:,} user profiles updated in'.format(result.modified_count),
             str(round(time.time()-t_start, 0)), 'seconds')
 
-        if (result.modified_count > 0):           
-            result = groups_collection.delete_one({'Id': group})
-            print('Group', group, 'deleted from', params.group_collection)
+        result = groups_collection.delete_one({'Id': group})
+        print('Group', group, 'deleted from', params.group_collection)
 
     except Exception as e:
         print("Error deleting group ...")
