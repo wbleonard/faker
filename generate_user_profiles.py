@@ -50,7 +50,10 @@ def process_records(groups_collection, target_collection):
         {'Id': 'B', 'Label': 'Bravo'},
         {'Id': 'C', 'Label': 'Charlie'},
         {'Id': 'D', 'Label': 'Delta'},
-        {'Id': 'E', 'Label': 'Echo'}]
+        {'Id': 'E', 'Label': 'Echo'},
+        {'Id': 'F', 'Label': 'Foxtrot'},
+        {'Id': 'G', 'Label': 'Golf'}]
+
 
     groups_collection.drop()
     groups_collection.insert_many(groups)
@@ -105,6 +108,8 @@ def group_size(collection, group):
     count = collection.count_documents({'group.Id': group})
     return count
 
+
+
 def commit_with_retry(session):
     while True:
         try:
@@ -122,7 +127,9 @@ def commit_with_retry(session):
                 print("Error during commit ...")
                 raise
 
-def delete_group(session, groups_collection, users_collection, group):
+# For millions of documents this process can exceed the 60 second timeout, which can only be extended via support
+# https://www.mongodb.com/docs/manual/reference/parameters/#mongodb-parameter-param.transactionLifetimeLimitSeconds
+def delete_group_txn(session, groups_collection, users_collection, group):
     group_document = get_group_document(group)
 
     print('Deleting {:,} members'.format(count), 'from group', group)
@@ -137,26 +144,50 @@ def delete_group(session, groups_collection, users_collection, group):
 
                 # See Remove Items from an Array of Documents
                 # https://www.mongodb.com/docs/manual/reference/operator/update/pull/#remove-items-from-an-array-of-documents
-                result = users_collection.update_many({}, {'$pull': {'group': group_document}}, upsert=False, session=session)
+                result = users_collection.update_many({'group.Id': group}, {'$pull': {'group': group_document}}, upsert=False, session=session)
 
                 print('{:,} user profiles updated in'.format(result.modified_count),
                     str(round(time.time()-t_start, 0)), 'seconds')
 
-                result = groups_collection.delete_one({'Id': group}, upsert=False, session=session)
-                print(result.modified_count, 'group deleted from', params.groups_collection)
+                result = groups_collection.delete_one({'Id': group}, session=session)
+                print('Group', group, 'deleted from', params.group_collection, 'collection')
 
                 commit_with_retry(session)
             break
         except (pymongo.errors.ConnectionFailure, pymongo.errors.OperationFailure) as exc:
             # If transient error, retry the whole transaction
             if exc.has_error_label("TransientTransactionError"):
-                print("TransientTransactionError, retrying "
-                      "transaction ...")
+                print("TransientTransactionError, retrying transaction ...")
                 continue
             else:
-                raise
+                raise            
 
+def delete_group(groups_collection, users_collection, group):
+    group_document = get_group_document(group)
 
+    print('Deleting {:,} members'.format(count), 'from group', group)
+    print(group_document)
+
+    print("Now:", datetime.now(), "\n")
+    t_start = time.time()
+
+    try:
+
+        # See Remove Items from an Array of Documents
+        # https://www.mongodb.com/docs/manual/reference/operator/update/pull/#remove-items-from-an-array-of-documents
+        result = users_collection.update_many({'group.Id': group}, {'$pull': {'group': group_document}})
+
+        print('{:,} user profiles updated in'.format(result.modified_count),
+            str(round(time.time()-t_start, 0)), 'seconds')
+
+        if (result.modified_count > 0):           
+            result = groups_collection.delete_one({'Id': group})
+            print('Group', group, 'deleted from', params.group_collection)
+
+    except Exception as e:
+        print("Error deleting group ...")
+        print(e)
+        sys.exit(0)
 
 
 def add_group(groups_collection, users_collection, group_document):
@@ -165,9 +196,9 @@ def add_group(groups_collection, users_collection, group_document):
 
     groups_collection.insert_one(group_document)
 
-    # Using existing group A as a cheap way to add a new group.
+    # Using existing group F as a cheap way to add a new group.
     users_collection.update_many(
-        {'group.Id': 'A'}, {'$push': {'group': group_document}})
+        {'group.Id': 'F'}, {'$push': {'group': group_document}})
 
 
 if __name__ == "__main__":
@@ -175,7 +206,7 @@ if __name__ == "__main__":
     # Process arguments
     parser = argparse.ArgumentParser(description='MongoDB Large Transaction Test')
     parser.add_argument('-t', '--task', help="The task to run",
-                    choices=['load', 'group_size', 'add_group', 'delete_group'])
+                    choices=['load', 'group_size', 'add_group', 'delete_group', 'delete_group_txn'])
     parser.add_argument('-g', '--group', help="The group Id")
     args = parser.parse_args()
 
@@ -186,7 +217,7 @@ if __name__ == "__main__":
     user_profiles_collection = database[params.target_collection]
     groups_collection = database[params.group_collection]
 
-    
+    # python3 generate_user_profiles.py -t load    
     if (args.task == 'load'):
         process_records(groups_collection, user_profiles_collection)
 
@@ -197,21 +228,30 @@ if __name__ == "__main__":
 
         print('Group', args.group, 'has {:,} members'.format(count))
 
-    # The -g arg should be the full group document. E.g., {"Id": "E", "Label": "Echo"}
-    # python3 generate_user_profiles.py -t add_group -g '{"Id": "E", "Label": "Echo"}'
+    # Add Group
+    # The -g arg should be the full group document. E.g., '{"Id": "H", "Label": "Hotel"}'
+    # python3 generate_user_profiles.py -t add_group -g '{"Id": "H", "Label": "Hotel"}'
     elif (args.task == 'add_group'):
         group = json.loads(args.group)
         add_group(groups_collection, user_profiles_collection, group)
 
+    # Delete Group
     # The -g arg should be the groupId. E.g. E
     # python3 generate_user_profiles.py -t delete_group -g E
     elif (args.task == 'delete_group'):
         count = group_size(user_profiles_collection, args.group)
 
+        delete_group(groups_collection, user_profiles_collection, args.group)
+    
+    # The -g arg should be the groupId. E.g. E
+    # python3 generate_user_profiles.py -t delete_group_txn -g E
+    elif (args.task == 'delete_group_txn'):
+        count = group_size(user_profiles_collection, args.group)
+
         # Start a client session.
         with client.start_session() as session:
             # Use with_transaction to start a transaction, execute the callback, and commit (or abort on error).
-            delete_group(session, groups_collection, user_profiles_collection, args.group)
+            delete_group_txn(session, groups_collection, user_profiles_collection, args.group)
 
     else:
         print("usage: generate_user_profiles.py [-h] [-t {load,group_size,delete_group}]")
