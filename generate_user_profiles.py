@@ -22,8 +22,8 @@ def get_collection(collection):
 
 
 def get_group_document(groupId):
-    collection = get_collection(params.group_collection)
-    return collection.find_one({'Id': groupId}, {'_id': 0})
+    #collection = get_collection(params.group_collection)
+    return groups_collection.find_one({'Id': groupId}, {'_id': 0})
 
 
 def process_records(groups_collection, target_collection):
@@ -145,9 +145,7 @@ def delete_group_txn(session, groups_collection, users_collection, group):
                 # See Remove Items from an Array of Documents
                 # https://www.mongodb.com/docs/manual/reference/operator/update/pull/#remove-items-from-an-array-of-documents
                 result = users_collection.update_many({'group.Id': group}, {'$pull': {'group': group_document}}, upsert=False, session=session)
-
-                print('{:,} user profiles updated in'.format(result.modified_count),
-                    str(round(time.time()-t_start, 0)), 'seconds')
+                print('{:,} user profiles updated in'.format(result.modified_count), str(round(time.time()-t_start, 0)), 'seconds')
 
                 result = groups_collection.delete_one({'Id': group}, session=session)
                 print('Group', group, 'deleted from', params.group_collection, 'collection')
@@ -176,9 +174,7 @@ def delete_group(groups_collection, users_collection, group):
         # See Remove Items from an Array of Documents
         # https://www.mongodb.com/docs/manual/reference/operator/update/pull/#remove-items-from-an-array-of-documents
         result = users_collection.update_many({'group.Id': group}, {'$pull': {'group': group_document}})
-
-        print('{:,} user profiles updated in'.format(result.modified_count),
-            str(round(time.time()-t_start, 0)), 'seconds')
+        print('{:,} user profiles updated in'.format(result.modified_count), str(round(time.time()-t_start, 0)), 'seconds')
 
         result = groups_collection.delete_one({'Id': group})
         print('Group', group, 'deleted from', params.group_collection)
